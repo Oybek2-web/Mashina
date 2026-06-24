@@ -32,3 +32,53 @@ def mashina_delete(request, id):
     return redirect('mashina_list')
 
 
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from openai import OpenAI
+import os
+import json
+
+client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+
+
+def chat_interface(request):
+    return render(request, 'chat_interface.html')
+
+
+@csrf_exempt
+def chat_response(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        user_message = data.get('message', '')
+
+        # Sayt mavzusi bo'yicha kontekst
+        system_prompt = """Siz Mashina (avtomobillar) sayti uchun yordamchi assistantsiz. 
+        Foydalanuvchilarga avtomobillar, ularning xususiyatlari, narxlari va boshqa 
+        savollariga javob berasiz. O'zbek tilida javob bering."""
+
+        try:
+            response = client.chat.completions.create(
+                model="gpt-3.5-turbo",  # yoki "gpt-4"
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_message}
+                ],
+                max_tokens=500,
+                temperature=0.7
+            )
+
+            ai_response = response.choices[0].message.content
+
+            return JsonResponse({
+                'success': True,
+                'response': ai_response
+            })
+
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            })
+
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
