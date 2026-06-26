@@ -7,6 +7,5 @@ urlpatterns = [
     path('update/<int:id>/', views.mashina_update, name='mashina_update'),
     path('delete/<int:id>/', views.mashina_delete, name='mashina_delete'),
 
-    path('chat/', views.chat_interface, name='chat_interface'),
     path('api/chat/', views.chat_response, name='chat_response'),
 ]

@@ -1,46 +1,234 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    }
 
-<a href="{% url 'mashina_create' %}"
-   class="btn btn-primary mb-3">
-    Add
-</a>
+    .page-header h1 {
+        margin: 0;
+        font-size: 32px;
+        font-weight: 700;
+    }
 
-<table class="table table-bordered">
+    .page-header p {
+        margin: 10px 0 0 0;
+        opacity: 0.9;
+        font-size: 16px;
+    }
 
-    <tr>
-        <th>Title</th>
-        <th>Description</th>
-        <th>Action</th>
-    </tr>
+    .add-btn {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        padding: 12px 30px;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 4px 15px rgba(56, 239, 125, 0.4);
+        transition: all 0.3s;
+        border: none;
+        font-size: 16px;
+    }
 
-    {% for i in mashina %}
+    .add-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(56, 239, 125, 0.6);
+        color: white;
+    }
 
-    <tr>
+    .add-btn::before {
+        content: '+';
+        font-size: 20px;
+        font-weight: bold;
+    }
 
-        <td>{{ i.title }}</td>
+    .table-container {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
 
-        <td>{{ i.descriptions }}</td>
+    .table {
+        margin: 0;
+    }
 
-        <td>
+    .table thead {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
 
-            <a href="{% url 'mashina_update' i.id %}"
-               class="btn btn-warning">
-                Edit
-            </a>
+    .table thead th {
+        padding: 20px;
+        font-weight: 600;
+        font-size: 16px;
+        border: none;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
 
-            <a href="{% url 'mashina_delete' i.id %}"
-               class="btn btn-danger">
-                Delete
-            </a>
+    .table tbody tr {
+        transition: all 0.3s;
+    }
 
-        </td>
+    .table tbody tr:hover {
+        background: #f8f9ff;
+        transform: scale(1.01);
+    }
 
-    </tr>
+    .table tbody td {
+        padding: 20px;
+        vertical-align: middle;
+        border-bottom: 1px solid #e9ecef;
+    }
 
-    {% endfor %}
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+    }
 
-</table>
+    .edit-btn {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        padding: 8px 20px;
+        border-radius: 25px;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 14px;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        box-shadow: 0 2px 10px rgba(245, 87, 108, 0.3);
+    }
 
+    .edit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(245, 87, 108, 0.5);
+        color: white;
+    }
+
+    .delete-btn {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        color: white;
+        padding: 8px 20px;
+        border-radius: 25px;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 14px;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        box-shadow: 0 2px 10px rgba(250, 112, 154, 0.3);
+    }
+
+    .delete-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(250, 112, 154, 0.5);
+        color: white;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+    }
+
+    .empty-state i {
+        font-size: 64px;
+        margin-bottom: 20px;
+        opacity: 0.3;
+    }
+
+    .empty-state h3 {
+        font-size: 24px;
+        margin-bottom: 10px;
+    }
+
+    .badge-count {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 600;
+    }
+</style>
+
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1>🚗 Avtomobillar Ro'yxati</h1>
+            <p>Barcha mashinalarni boshqarish</p>
+        </div>
+        <a href="{% url 'mashina_create' %}" class="add-btn">
+            Yangi Mashina
+        </a>
+    </div>
+</div>
+
+<div class="table-container">
+    {% if mashina %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Nomi</th>
+                <th>Tavsif</th>
+                <th style="width: 250px;">Amallar</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i in mashina %}
+            <tr>
+                <td><strong>{{ forloop.counter }}</strong></td>
+                <td>
+                    <div style="font-weight: 600; color: #667eea;">
+                        {{ i.title }}
+                    </div>
+                </td>
+                <td>{{ i.descriptions|truncatewords:10 }}</td>
+                <td>
+                    <div class="action-buttons">
+                        <a href="{% url 'mashina_update' i.id %}" class="edit-btn">
+                            ✏️ Tahrirlash
+                        </a>
+                        <a href="{% url 'mashina_delete' i.id %}"
+                           class="delete-btn"
+                           onclick="return confirm('Rostdan ham o\'chirmoqchimisiz?')">
+                            🗑️ O'chirish
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <div style="font-size: 64px; margin-bottom: 20px;">🚗</div>
+        <h3>Hali mashinalar yo'q</h3>
+        <p>Birinchi mashinangizni qo'shing</p>
+        <a href="{% url 'mashina_create' %}" class="add-btn" style="margin-top: 20px;">
+            Qo'shish
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<div style="margin-top: 20px; text-align: center;">
+    <span class="badge-count">
+        Jami: {{ mashina.count }} ta mashina
+    </span>
+</div>
 {% endblock %}
